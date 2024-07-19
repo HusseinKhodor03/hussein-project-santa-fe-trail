@@ -55,7 +55,7 @@ class SantaFeEnvironment:
         self.reset(ANT_STARTING_X, ANT_STARTING_Y, DIRECTION_RIGHT)
 
     def step(self, action):
-        self.current_time_step += 1
+        self.current_time_steps += 1
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -67,11 +67,11 @@ class SantaFeEnvironment:
         run = True
 
         if (len(self.food_pellet_positions) == 0) or (
-            self.current_time_step > MAX_TIME_STEPS
+            self.current_time_steps > MAX_TIME_STEPS
         ):
             run = False
             reward = -10
-            return run, reward, self.score
+            return run, reward, self.score, self.current_time_steps
 
         current_ant_position = (self.x // CELL_WIDTH, self.y // CELL_HEIGHT)
 
@@ -82,7 +82,7 @@ class SantaFeEnvironment:
 
         self.draw_window()
         self.clock.tick(FPS)
-        return run, reward, self.score
+        return run, reward, self.score, self.current_time_steps
 
     def reset(self, x, y, direction):
         self.x = x
@@ -90,7 +90,7 @@ class SantaFeEnvironment:
         self.direction = direction
 
         self.score = 0
-        self.current_time_step = 0
+        self.current_time_steps = 0
 
         self.food_pellet_positions = self.load_food_pellet_positions(
             os.path.join("assets", "food_pellet_positions.csv")
