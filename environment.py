@@ -1,6 +1,7 @@
 import pygame
 import csv
 import os
+import numpy as np
 
 pygame.font.init()
 
@@ -22,7 +23,11 @@ FOOD_PELLET_COLOR = (0, 0, 204)
 ANT_WIDTH, ANT_HEIGHT = 20, 25
 ANT_STARTING_X = 0 * CELL_WIDTH + (CELL_WIDTH - ANT_WIDTH) / 2
 ANT_STARTING_Y = 0 * CELL_HEIGHT + (CELL_HEIGHT - ANT_HEIGHT) / 2
-ANT_STARTING_DIRECTION = 270
+
+DIRECTION_RIGHT = 270
+DIRECTION_LEFT = 90
+DIRECTION_UP = 0
+DIRECTION_DOWN = 180
 
 ANT_SPRITE = pygame.image.load(os.path.join("assets", "ant.png"))
 ANT = pygame.transform.scale(ANT_SPRITE, (ANT_WIDTH, ANT_HEIGHT))
@@ -47,7 +52,7 @@ class SantaFeEnvironment:
         pygame.display.set_caption("Santa Fe Trail Simulation")
 
         self.clock = pygame.time.Clock()
-        self.reset(ANT_STARTING_X, ANT_STARTING_Y, ANT_STARTING_DIRECTION)
+        self.reset(ANT_STARTING_X, ANT_STARTING_Y, DIRECTION_RIGHT)
 
     def step(self, action):
         self.current_time_step += 1
@@ -61,9 +66,9 @@ class SantaFeEnvironment:
         reward = 0
         run = True
 
-        if (self.current_time_step > MAX_TIME_STEPS) or len(
-            self.food_pellet_positions
-        ) == 0:
+        if (len(self.food_pellet_positions) == 0) or (
+            self.current_time_step > MAX_TIME_STEPS
+        ):
             run = False
             reward = -10
             return run, reward, self.score
@@ -92,7 +97,40 @@ class SantaFeEnvironment:
         )
 
     def move(self, action):
-        pass
+        # [straight, right, left]
+        clockwise = [
+            DIRECTION_RIGHT,
+            DIRECTION_DOWN,
+            DIRECTION_LEFT,
+            DIRECTION_UP,
+        ]
+        index = clockwise.index(self.direction)
+
+        if np.array_equal(action, [1, 0, 0]):
+            self.direction = clockwise[index]  # straight
+        elif np.array_equal(action, [0, 1, 0]):
+            self.direction = clockwise[(index + 1) % 4]  # right turn
+        else:
+            self.direction = clockwise[(index - 1) % 4]  # left turn
+
+        if self.direction == DIRECTION_RIGHT:
+            self.x += CELL_WIDTH
+        elif self.direction == DIRECTION_DOWN:
+            self.y += CELL_HEIGHT
+        elif self.direction == DIRECTION_LEFT:
+            self.x -= CELL_WIDTH
+        elif self.direction == DIRECTION_UP:
+            self.y -= CELL_HEIGHT
+
+        if self.x >= self.width:
+            self.x = 0
+        elif self.x < 0:
+            self.x = self.width - CELL_WIDTH
+
+        if self.y >= self.height:
+            self.y = 0
+        elif self.y < 0:
+            self.y = self.height - CELL_HEIGHT
 
     def load_food_pellet_positions(self, filename):
         positions = []
@@ -150,40 +188,3 @@ class SantaFeEnvironment:
         score_text = SCORE_FONT.render(f"Score: {self.score}", True, TEXT_COLOR)
         self.window.blit(score_text, (0, 0))
         pygame.display.update()
-
-
-def main():
-    run = True
-
-    env = SantaFeEnvironment(WINDOW_WIDTH, WINDOW_HEIGHT)
-
-    while run:
-        env.clock.tick(FPS)
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = False
-
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RIGHT:
-                    env.x += CELL_WIDTH
-                    env.direction = 270
-                    run, reward, score = env.step(0)
-                if event.key == pygame.K_DOWN:
-                    env.y += CELL_HEIGHT
-                    env.direction = 180
-                    run, reward, score = env.step(0)
-                if event.key == pygame.K_UP:
-                    env.y -= CELL_HEIGHT
-                    env.direction = 0
-                    run, reward, score = env.step(0)
-                if event.key == pygame.K_LEFT:
-                    env.x -= CELL_HEIGHT
-                    env.direction = 90
-                    run, reward, score = env.step(0)
-
-        env.draw_window()
-
-
-if __name__ == "__main__":
-    main()
