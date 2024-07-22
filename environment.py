@@ -5,7 +5,7 @@ import numpy as np
 
 pygame.font.init()
 
-SCORE_FONT = pygame.font.SysFont("arial", 25)
+SCORE_FONT = pygame.font.SysFont("arial", 20)
 
 GRID_WIDTH, GRID_HEIGHT = 32, 32
 CELL_WIDTH, CELL_HEIGHT = 28, 28
@@ -39,8 +39,8 @@ FOOD_PELLET = pygame.transform.scale(
     FOOD_PELLET_SPRITE, (FOOD_PELLET_WIDTH, FOOD_PELLET_HEIGHT)
 )
 
-FPS = 20
-MAX_TIME_STEPS = 200
+FPS = 144
+MAX_TIME_STEPS = 500
 
 
 class SantaFeEnvironment:

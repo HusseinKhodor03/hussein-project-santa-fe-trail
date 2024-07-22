@@ -14,6 +14,7 @@ from environment import (
 )
 from collections import deque
 from model import LinearQNet, QTrainer
+from plotter import plot
 
 MAX_MEMORY = 100_000
 BATCH_SIZE = 1000
@@ -133,6 +134,25 @@ def train():
             print(
                 f"Run #{agent.num_runs} - Score: {score}, Highest Score: {max_score} | "
                 f"Time Steps: {time_steps}, Highest Time Steps: {max_time_steps}"
+            )
+
+            plot_scores.append(score)
+            total_score += score
+
+            mean_score = total_score / agent.num_runs
+            plot_mean_scores.append(mean_score)
+
+            plot_time_steps.append(time_steps)
+            total_time_steps += time_steps
+
+            mean_time_steps = total_time_steps / agent.num_runs
+            plot_mean_time_steps.append(mean_time_steps)
+
+            plot(
+                plot_scores,
+                plot_mean_scores,
+                plot_time_steps,
+                plot_mean_time_steps,
             )
 
 
