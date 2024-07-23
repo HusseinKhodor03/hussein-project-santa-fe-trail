@@ -5,6 +5,8 @@ from environment import (
     SantaFeEnvironment,
     WINDOW_WIDTH,
     WINDOW_HEIGHT,
+    CELL_WIDTH,
+    CELL_HEIGHT,
     ANT_STARTING_X,
     ANT_STARTING_Y,
     DIRECTION_RIGHT,
@@ -31,22 +33,58 @@ class Agent:
         self.trainer = QTrainer(self.model, LEARNING_RATE, self.gamma)
 
     def get_state(self, environment):
+        state = []
+
         direction_right = environment.direction == DIRECTION_RIGHT
         direction_left = environment.direction == DIRECTION_LEFT
         direction_up = environment.direction == DIRECTION_UP
         direction_down = environment.direction == DIRECTION_DOWN
 
+        food_pellet_right = False
+        food_pellet_left = False
+        food_pellet_up = False
+        food_pellet_down = False
+
+        current_ant_position = (
+            environment.x // CELL_WIDTH,
+            environment.y // CELL_HEIGHT,
+        )
+
+        if len(environment.food_pellet_positions) == 0:
+            state = [
+                direction_right,
+                direction_left,
+                direction_up,
+                direction_down,
+                food_pellet_right,
+                food_pellet_left,
+                food_pellet_up,
+                food_pellet_down,
+            ]
+
+            return np.array(state, dtype=int)
+
         nearest_food_pellet = min(
             environment.food_pellet_positions,
-            key=lambda food_pellet: abs(food_pellet[0] - environment.x)
-            + abs(food_pellet[1] - environment.y),
+            key=lambda food_pellet: abs(
+                food_pellet[0] - current_ant_position[0]
+            )
+            + abs(food_pellet[1] - current_ant_position[1]),
         )
         food_pellet_x, food_pellet_y = nearest_food_pellet
 
-        food_pellet_right = food_pellet_x > environment.x  # food pellet right
-        food_pellet_left = food_pellet_x < environment.x  # food pellet left
-        food_pellet_up = food_pellet_y < environment.y  # food pellet up
-        food_pellet_down = food_pellet_y > environment.y  # food pellet down
+        food_pellet_right = (
+            food_pellet_x > current_ant_position[0]
+        )  # food pellet right
+        food_pellet_left = (
+            food_pellet_x < current_ant_position[0]
+        )  # food pellet left
+        food_pellet_up = (
+            food_pellet_y < current_ant_position[1]
+        )  # food pellet up
+        food_pellet_down = (
+            food_pellet_y > current_ant_position[1]
+        )  # food pellet down
 
         state = [
             direction_right,

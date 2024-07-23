@@ -6,6 +6,7 @@ import numpy as np
 pygame.font.init()
 
 SCORE_FONT = pygame.font.SysFont("arial", 20)
+TIME_STEPS_FONT = pygame.font.SysFont("arial", 20)
 
 GRID_WIDTH, GRID_HEIGHT = 32, 32
 CELL_WIDTH, CELL_HEIGHT = 28, 28
@@ -21,8 +22,12 @@ FOOD_PELLET_WIDTH, FOOD_PELLET_HEIGHT = 47, 29
 FOOD_PELLET_COLOR = (0, 0, 204)
 
 ANT_WIDTH, ANT_HEIGHT = 20, 25
-ANT_STARTING_X = 0 * CELL_WIDTH + (CELL_WIDTH - ANT_WIDTH) / 2
-ANT_STARTING_Y = 0 * CELL_HEIGHT + (CELL_HEIGHT - ANT_HEIGHT) / 2
+ANT_STARTING_X = (
+    0 * CELL_WIDTH + (CELL_WIDTH - ANT_WIDTH) / 2 + GRID_LINE_WIDTH / 4
+)
+ANT_STARTING_Y = (
+    0 * CELL_HEIGHT + (CELL_HEIGHT - ANT_HEIGHT) / 2 + GRID_LINE_WIDTH / 4
+)
 
 DIRECTION_RIGHT = 270
 DIRECTION_LEFT = 90
@@ -39,8 +44,8 @@ FOOD_PELLET = pygame.transform.scale(
     FOOD_PELLET_SPRITE, (FOOD_PELLET_WIDTH, FOOD_PELLET_HEIGHT)
 )
 
-FPS = 144
-MAX_TIME_STEPS = 500
+FPS = 10
+MAX_TIME_STEPS = 200
 
 
 class SantaFeEnvironment:
@@ -56,6 +61,7 @@ class SantaFeEnvironment:
 
     def step(self, action):
         self.current_time_steps += 1
+        self.remaining_time_steps -= 1
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -66,11 +72,14 @@ class SantaFeEnvironment:
         reward = 0
         run = True
 
-        if (len(self.food_pellet_positions) == 0) or (
-            self.current_time_steps > MAX_TIME_STEPS
-        ):
+        if len(self.food_pellet_positions) == 0:
             run = False
-            reward = -10
+            reward = (self.score / self.current_time_steps) * 100
+            return run, reward, self.score, self.current_time_steps
+
+        if self.current_time_steps >= MAX_TIME_STEPS:
+            run = False
+            reward = -100
             return run, reward, self.score, self.current_time_steps
 
         current_ant_position = (self.x // CELL_WIDTH, self.y // CELL_HEIGHT)
@@ -78,7 +87,7 @@ class SantaFeEnvironment:
         if current_ant_position in self.food_pellet_positions:
             self.food_pellet_positions.remove(current_ant_position)
             self.score += 1
-            reward = 10
+            reward = (self.score / self.current_time_steps) * 10
 
         self.draw_window()
         self.clock.tick(FPS)
@@ -91,6 +100,7 @@ class SantaFeEnvironment:
 
         self.score = 0
         self.current_time_steps = 0
+        self.remaining_time_steps = MAX_TIME_STEPS
 
         self.food_pellet_positions = self.load_food_pellet_positions(
             os.path.join("assets", "food_pellet_positions.csv")
@@ -186,5 +196,13 @@ class SantaFeEnvironment:
         )
 
         score_text = SCORE_FONT.render(f"Score: {self.score}", True, TEXT_COLOR)
+        time_steps_text = TIME_STEPS_FONT.render(
+            f"Remaining Time Steps: {self.remaining_time_steps}",
+            True,
+            TEXT_COLOR,
+        )
+
         self.window.blit(score_text, (0, 0))
+        self.window.blit(time_steps_text, (652, 0))
+
         pygame.display.update()
