@@ -13,6 +13,7 @@ from environment import (
     DIRECTION_LEFT,
     DIRECTION_UP,
     DIRECTION_DOWN,
+    MAX_TIME_STEPS,
 )
 from collections import deque
 from model import LinearQNet, QTrainer
@@ -141,7 +142,7 @@ def train():
     total_time_steps = 0
 
     max_score = 0
-    max_time_steps = 0
+    min_time_steps = MAX_TIME_STEPS
 
     agent = Agent()
     environment = SantaFeEnvironment(WINDOW_WIDTH, WINDOW_HEIGHT)
@@ -166,12 +167,12 @@ def train():
             if score > max_score:
                 max_score = score
 
-            if time_steps > max_time_steps:
-                max_time_steps = time_steps
+            if time_steps < min_time_steps:
+                min_time_steps = time_steps
 
             print(
                 f"Run #{agent.num_runs} - Score: {score}, Highest Score: {max_score} | "
-                f"Time Steps: {time_steps}, Highest Time Steps: {max_time_steps}"
+                f"Time Steps: {time_steps}, Lowest Time Steps: {min_time_steps}"
             )
 
             plot_scores.append(score)
