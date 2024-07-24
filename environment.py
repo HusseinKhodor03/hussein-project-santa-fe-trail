@@ -86,13 +86,13 @@ class SantaFeEnvironment:
         if len(self.food_pellet_positions) == 0:
             run = False
             reward = (self.score / self.current_time_steps) * 100
-            return run, reward, self.score, self.current_time_steps
+            return run, reward, self.score, self.current_time_steps - 1
 
         # Check if the max time steps are reached
-        if self.current_time_steps >= MAX_TIME_STEPS:
+        if self.current_time_steps > MAX_TIME_STEPS:
             run = False
             reward = -100
-            return run, reward, self.score, self.current_time_steps
+            return run, reward, self.score, self.current_time_steps - 1
 
         # Calculate current ant position
         current_ant_position = (
