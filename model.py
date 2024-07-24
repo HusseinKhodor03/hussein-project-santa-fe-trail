@@ -45,7 +45,7 @@ class QTrainer:
         for index in range(len(run)):
             Q_new = reward[index]
 
-            if not run[index]:
+            if run[index]:  # TODO: Inspect "if not run[index] vs if run[index]"
                 Q_new = reward[index] + self.gamma * torch.max(
                     self.model(next_state[index])
                 )

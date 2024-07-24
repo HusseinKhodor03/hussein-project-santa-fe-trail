@@ -44,8 +44,8 @@ FOOD_PELLET = pygame.transform.scale(
     FOOD_PELLET_SPRITE, (FOOD_PELLET_WIDTH, FOOD_PELLET_HEIGHT)
 )
 
-FPS = 10
-MAX_TIME_STEPS = 200
+FPS = 60
+MAX_TIME_STEPS = 150
 
 
 class SantaFeEnvironment:
@@ -82,7 +82,10 @@ class SantaFeEnvironment:
             reward = -100
             return run, reward, self.score, self.current_time_steps
 
-        current_ant_position = (self.x // CELL_WIDTH, self.y // CELL_HEIGHT)
+        current_ant_position = (
+            int(self.x // CELL_WIDTH),
+            int(self.y // CELL_HEIGHT),
+        )
 
         if current_ant_position in self.food_pellet_positions:
             self.food_pellet_positions.remove(current_ant_position)
@@ -105,6 +108,7 @@ class SantaFeEnvironment:
         self.food_pellet_positions = self.load_food_pellet_positions(
             os.path.join("assets", "food_pellet_positions.csv")
         )
+        self.draw_window()
 
     def move(self, action):
         # [straight, right, left]

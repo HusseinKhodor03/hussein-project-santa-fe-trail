@@ -47,8 +47,8 @@ class Agent:
         food_pellet_down = False
 
         current_ant_position = (
-            environment.x // CELL_WIDTH,
-            environment.y // CELL_HEIGHT,
+            int(environment.x // CELL_WIDTH),
+            int(environment.y // CELL_HEIGHT),
         )
 
         if len(environment.food_pellet_positions) == 0:
@@ -74,18 +74,10 @@ class Agent:
         )
         food_pellet_x, food_pellet_y = nearest_food_pellet
 
-        food_pellet_right = (
-            food_pellet_x > current_ant_position[0]
-        )  # food pellet right
-        food_pellet_left = (
-            food_pellet_x < current_ant_position[0]
-        )  # food pellet left
-        food_pellet_up = (
-            food_pellet_y < current_ant_position[1]
-        )  # food pellet up
-        food_pellet_down = (
-            food_pellet_y > current_ant_position[1]
-        )  # food pellet down
+        food_pellet_right = food_pellet_x > current_ant_position[0]
+        food_pellet_left = food_pellet_x < current_ant_position[0]
+        food_pellet_up = food_pellet_y < current_ant_position[1]
+        food_pellet_down = food_pellet_y > current_ant_position[1]
 
         state = [
             direction_right,
