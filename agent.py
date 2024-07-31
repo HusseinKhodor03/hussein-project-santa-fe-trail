@@ -1,4 +1,5 @@
 import torch
+import pygame
 import numpy as np
 import random
 from environment import (
@@ -153,63 +154,70 @@ def train():
     agent = Agent()
     environment = SantaFeEnvironment(WINDOW_WIDTH, WINDOW_HEIGHT)
 
-    while True:
-        # Get the current state of the environment
-        state_old = agent.get_state(environment)
+    try:
+        while True:
+            # Get the current state of the environment
+            state_old = agent.get_state(environment)
 
-        # Get the action to take based on the current state
-        final_move = agent.get_action(state_old)
+            # Get the action to take based on the current state
+            final_move = agent.get_action(state_old)
 
-        # Perform the action and get the reward and next state
-        run, reward, score, time_steps = environment.step(final_move)
-        state_new = agent.get_state(environment)
+            # Perform the action and get the reward and next state
+            run, reward, score, time_steps = environment.step(final_move)
+            state_new = agent.get_state(environment)
 
-        # Train the agent with short memory
-        agent.train_short_memory(state_old, final_move, reward, state_new, run)
-
-        # Store the experience in the agent's memory
-        agent.remember(state_old, final_move, reward, state_new, run)
-
-        if not run:
-            # Reset the environment
-            environment.reset(ANT_STARTING_X, ANT_STARTING_Y, DIRECTION_RIGHT)
-            agent.num_runs += 1
-
-            # Train the agent with long memory
-            agent.train_long_memory()
-
-            # Update the max score and min time steps
-            if score > max_score:
-                max_score = score
-
-            if time_steps < min_time_steps:
-                min_time_steps = time_steps
-
-            # Print the current run's statistics
-            print(
-                f"Run #{agent.num_runs} - Score: {score}, Highest Score: {max_score} | "
-                f"Time Steps: {time_steps}, Lowest Time Steps: {min_time_steps}"
+            # Train the agent with short memory
+            agent.train_short_memory(
+                state_old, final_move, reward, state_new, run
             )
 
-            # Update the score and mean score data for plotting
-            plot_scores.append(score)
-            total_score += score
-            mean_score = total_score / agent.num_runs
-            plot_mean_scores.append(mean_score)
+            # Store the experience in the agent's memory
+            agent.remember(state_old, final_move, reward, state_new, run)
 
-            # Update the time steps and mean time steps data for plotting
-            plot_time_steps.append(time_steps)
-            total_time_steps += time_steps
-            mean_time_steps = total_time_steps / agent.num_runs
-            plot_mean_time_steps.append(mean_time_steps)
+            if not run:
+                # Reset the environment
+                environment.reset(
+                    ANT_STARTING_X, ANT_STARTING_Y, DIRECTION_RIGHT
+                )
+                agent.num_runs += 1
 
-            # Plot the scores and time steps
-            plot(
-                plot_scores,
-                plot_mean_scores,
-                plot_time_steps,
-                plot_mean_time_steps,
-            )
+                # Train the agent with long memory
+                agent.train_long_memory()
+
+                # Update the max score and min time steps
+                if score > max_score:
+                    max_score = score
+
+                if time_steps < min_time_steps:
+                    min_time_steps = time_steps
+
+                # Print the current run's statistics
+                print(
+                    f"Run #{agent.num_runs} - Score: {score}, Highest Score: {max_score} | "
+                    f"Time Steps: {time_steps}, Lowest Time Steps: {min_time_steps}"
+                )
+
+                # Update the score and mean score data for plotting
+                plot_scores.append(score)
+                total_score += score
+                mean_score = total_score / agent.num_runs
+                plot_mean_scores.append(mean_score)
+
+                # Update the time steps and mean time steps data for plotting
+                plot_time_steps.append(time_steps)
+                total_time_steps += time_steps
+                mean_time_steps = total_time_steps / agent.num_runs
+                plot_mean_time_steps.append(mean_time_steps)
+
+                # Plot the scores and time steps
+                plot(
+                    plot_scores,
+                    plot_mean_scores,
+                    plot_time_steps,
+                    plot_mean_time_steps,
+                )
+    except pygame.error:
+        return
 
 
 if __name__ == "__main__":

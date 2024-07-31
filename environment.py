@@ -70,6 +70,8 @@ class SantaFeEnvironment:
         # Increment time steps
         self.current_time_steps += 1
         self.remaining_time_steps -= 1
+        reward = 0
+        run = True
 
         # Handle Pygame events
         for event in pygame.event.get():
@@ -78,9 +80,6 @@ class SantaFeEnvironment:
 
         # Move the ant based on the action
         self.move(action)
-
-        reward = 0
-        run = True
 
         # Check if all the food pellets are collected
         if len(self.food_pellet_positions) == 0:
