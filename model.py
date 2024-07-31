@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
+import numpy as np
 
 
 class LinearQNet(nn.Module):
@@ -28,10 +29,10 @@ class QTrainer:
 
     def train_step(self, state, action, reward, next_state, run):
         # Convert the experience tuples to PyTorch tensors
-        state = torch.tensor(state, dtype=torch.float)
+        state = torch.tensor(np.array(state), dtype=torch.float)
         action = torch.tensor(action, dtype=torch.long)
         reward = torch.tensor(reward, dtype=torch.float)
-        next_state = torch.tensor(next_state, dtype=torch.float)
+        next_state = torch.tensor(np.array(next_state), dtype=torch.float)
 
         # If a single experience tuple is passed, convert it to a batch size of 1
         if len(state.shape) == 1:
